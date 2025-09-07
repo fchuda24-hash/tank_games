@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tank Controls Demo — sounds fixed</title>
+<style>
+*{user-select:none;-webkit-user-select:none}
+body{display:flex;justify-content:space-around;align-items:center;height:100vh;margin:0;font-family:Arial;background:#111;color:#fff}
+.controls{display:flex;flex-direction:column;align-items:center}
+.row{display:flex;justify-content:center;margin:5px}
+button{width:80px;height:80px;font-size:24px;margin:5px;border-radius:12px;transition:transform .08s,background-color .12s}
+button:active{transform:scale(.88)}button.hold{background:#555}
+#shoot{background:#d33;color:#fff;width:70px;height:70px;border-radius:50%;position:relative;margin-bottom:6px}
+#shootOverlay{position:absolute;top:0;left:0;width:70px;height:70px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:12px;display:none}
+#reloadCircle{width:50px;height:50px;transform:rotate(-90deg)}
+#reloadCircle svg{width:100%;height:100%}
+#reloadCircle circle{fill:none;stroke:rgba(255,255,255,.25);stroke-width:5}
+#reloadCircle circle.progress{stroke:#fff;stroke-dasharray:157;stroke-dashoffset:157;transition:none}
+#turretControls{display:flex;flex-direction:column;align-items:center;margin-top:6px}
+#ammoSelect{margin-top:10px;font-size:16px;padding:4px}
+</style>
+</head>
+<body>
+  <div class="controls">
+    <button id="up">⬆️</button>
+    <button id="down">⬇️</button>
+  </div>
+
+  <div class="controls" style="position:relative">
+    <div style="position:relative">
+      <button id="shoot">💥</button>
+      <div id="shootOverlay"><div>Přebíjení</div><div id="reloadCircle"><svg><circle cx="25" cy="25" r="25"></circle><circle class="progress" cx="25" cy="25" r="25"></circle></svg></div></div>
+    </div>
+
+    <div class="row">
+      <button id="left">⬅️</button>
+      <button id="right">➡️</button>
+    </div>
+
+    <div id="turretControls">
+      <div id="turretLabel">Pohyb věže</div>
+      <div id="turretButtons" class="row">
+        <button id="turretLeft">↶⬅️</button>
+        <button id="turretRight">➡️</button>
+      </div>
+      <select id="ammoSelect">
+        <option value="heat">HEAT 🔥</option>
+        <option value="sabot">Sabot 🚀</option>
+        <option value="explosive">Výbušnina 💥</option>
+        <option value="piercing">Průbojná ⚡</option>
+      </select>
+    </div>
+  </div>
+
+<script>
+// ---------- SOUNDS (použij přesně tyhle soubory ve složce sounds/) ----------
+const S = {
+  engineIdle: new Audio("sounds/engine_idle.mp3"),   // loop while idle
+  engineMove: new Audio("sounds/engine_move.mp3"),   // loop while moving
+  shoot:      new Audio("sounds/shoot.mp3"),
+  reload:     new Audio("sounds/reload.mp3"),        // loop during reload
+  // callouts when starting reload (announce)
+  call_heat:      new Audio("sounds/call_heat.mp3"),
+  call_sabot:     new Audio("sounds/call_sabot.mp3"),
+  call_explosive: new Audio("sounds/call_explosive.mp3"),
+  call_piercing:  new Audio("sounds/call_piercing.mp3"),
+  // ready sounds when reload finished (no piercing ready)
+  ready_heat:      new Audio("sounds/ready_heat.mp3"),
+  ready_sabot:     new Audio("sounds/ready_sabot.mp3"),
+  ready_explosive: new Audio("sounds/ready_explosive.mp3")
+};
+
+// loops
+S.engineIdle.loop = true;
+S.engineMove.loop = true;
+S.reload.loop = true;
+
+// safe play helper (avoid UnhandledPromise)
+function safePlay(aud){
+  if(!aud) return;
+  try{ aud.currentTime = 0; aud.play().catch(()=>{}); }catch(e){}
+}
+function safePause(aud){
+  if(!aud) return;
+  try{ aud.pause(); aud.currentTime = 0; }catch(e){}
+}
+
+// start idle on first user interaction if autoplay blocked
+let userInteracted = false;
+function ensureAudioAfterUser(){
+  if(userInteracted) return;
+  userInteracted = true;
+  safePlay(S.engineIdle);
+}
+window.addEventListener('pointerdown', ensureAudioAfterUser, {once:true});
+window.addEventListener('touchstart', ensureAudioAfterUser, {once:true});
+
+// ---------- CONTROLS ----------
+const btnIds = ['up','down','left','right'];
+btnIds.forEach(id=>{
+  const b = document.getElementById(id);
+  b.addEventListener('pointerdown', e => { b.classList.add('hold'); if(id==='up' || id==='down') startMoveSound(id); });
+  b.addEventListener('pointerup',   e => { b.classList.remove('hold'); if(id==='up' || id==='down') stopMoveSound(); });
+  b.addEventListener('pointerleave',e => { b.classList.remove('hold'); if(id==='up' || id==='down') stopMoveSound(); });
+});
+
+// turret buttons (simple hold effect)
+['turretLeft','turretRight'].forEach(id=>{
+  const b = document.getElementById(id);
+  b.addEventListener('pointerdown', ()=> b.classList.add('hold'));
+  b.addEventListener('pointerup', ()=> b.classList.remove('hold'));
+  b.addEventListener('pointerleave', ()=> b.classList.remove('hold'));
+});
+
+// ---------- MOVE SOUND logic ----------
+let moving = false;
+function startMoveSound(direction){
+  // stop idle, start move
+  if(moving) return;
+  moving = true;
+  safePause(S.engineIdle);
+  safePlay(S.engineMove);
+}
+function stopMoveSound(){
+  if(!moving) return;
+  moving = false;
+  safePause(S.engineMove);
+  safePlay(S.engineIdle);
+}
+
+// ---------- SHOOT / AMMO / RELOAD ----------
+const shootBtn = document.getElementById('shoot');
+const overlay = document.getElementById('shootOverlay');
+const progressCircle = document.querySelector('#reloadCircle circle.progress');
+
+let canShoot = true;
+let ammoType = 'heat';
+
+const ammoSettings = {
+  heat: { emoji:'🔥', cooldown:6000 },
+  explosive: { emoji:'💥', cooldown:7000 },
+  sabot: { emoji:'🚀', cooldown:8000 },
+  piercing: { emoji:'⚡', cooldown:5000 }
+};
+const ammoDamage = { heat:1, explosive:1, sabot:1.5, piercing:0.5 };
+
+const ammoSelect = document.getElementById('ammoSelect');
+ammoSelect.addEventListener('change', e=>{
+  ammoType = e.target.value;
+  shootBtn.textContent = ammoSettings[ammoType].emoji;
+  // play callout if exists
+  const callName = "call_" + ammoType;
+  if(S[callName]) safePlay(S[callName]);
+  // start cooldown as if reloading after changing ammo
+  startCooldown(ammoSettings[ammoType].cooldown);
+});
+
+let tankHealth = 5;
+
+// animation + timers refs
+let rafId = null;
+let timeoutId = null;
+
+function startCooldown(duration){
+  // cancel existing
+  if(rafId) cancelAnimationFrame(rafId);
+  if(timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+  canShoot = false;
+  overlay.style.display = "flex";
+
+  // start reload sound (looping)
+  safePlay(S.reload);
+
+  const totalDash = 157;
+  const started = performance.now();
+
+  function frame(t){
+    const elapsed = t - started;
+    const progress = Math.min(elapsed / duration, 1);
+    progressCircle.style.strokeDashoffset = totalDash * (1 - progress);
+    if(progress < 1) rafId = requestAnimationFrame(frame);
+    else rafId = null;
+  }
+  rafId = requestAnimationFrame(frame);
+
+  timeoutId = setTimeout(()=> {
+    // finish
+    canShoot = true;
+    overlay.style.display = "none";
+    progressCircle.style.strokeDashoffset = totalDash;
+    // stop reload sound
+    safePause(S.reload);
+    // play ready if exists
+    const readyName = "ready_" + ammoType;
+    if(S[readyName]) safePlay(S[readyName]);
+    // clear refs
+    if(rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    timeoutId = null;
+  }, duration);
+}
+
+shootBtn.addEventListener('click', ()=>{
+  if(!canShoot) return;
+  safePlay(S.shoot);
+
+  tankHealth -= ammoDamage[ammoType];
+  if(tankHealth < 0) tankHealth = 0;
+  console.log("Shot:", ammoType, "health left:", tankHealth);
+
+  startCooldown(ammoSettings[ammoType].cooldown);
+});
+
+// ensure progress circle reset on load
+progressCircle.style.strokeDashoffset = 157;
+</script>
+</body>
+</html>
+
+
