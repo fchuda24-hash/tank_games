@@ -16,31 +16,61 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  height:100vh;
-  margin:0;
-  font-family:Arial;
+body { 
+  display:flex; 
+  justify-content:space-around; 
+  align-items:center; 
+  height:100vh; 
+  margin:0; 
+  font-family:Arial; 
 }
-.controls { display:flex; flex-direction:column; align-items:center; }
-.row { display:flex; justify-content:center; margin:5px; }
+.controls { 
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+}
+.row { 
+  display:flex; 
+  justify-content:center; 
+  margin:5px; 
+}
 button {
-  width:80px; height:80px; font-size:24px; margin:5px; border-radius:12px;
+  width:80px; 
+  height:80px; 
+  font-size:24px; 
+  margin:5px; 
+  border-radius:12px;
   transition: transform 0.1s, background-color 0.2s;
 }
 button:active { transform: scale(0.85); }
 button.hold { background-color: #ccc; }
 
-#shoot {
-  background:red; color:white; width:70px; height:70px; font-size:24px; border-radius:50%; margin-bottom:5px; position:relative;
+#shoot { 
+  background:red; 
+  color:white; 
+  width:70px; 
+  height:70px; 
+  font-size:24px; 
+  border-radius:50%; 
+  margin-bottom:5px; 
+  position:relative; 
 }
 
 #shootOverlay {
-  position:absolute; top:0; left:0; width:70px; height:70px; border-radius:50%;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:rgba(0,0,0,0.5); color:white; font-size:12px; display:none;
+  position:absolute; 
+  top:0; 
+  left:0; 
+  width:70px; 
+  height:70px; 
+  border-radius:50%;
+  display:flex; 
+  flex-direction:column; 
+  align-items:center; 
+  justify-content:center;
+  background:rgba(0,0,0,0.5); 
+  color:white; 
+  font-size:12px; 
+  display:none;
 }
 
 #reloadCircle { width:50px; height:50px; transform: rotate(-90deg); }
@@ -85,8 +115,8 @@ button.hold { background-color: #ccc; }
       <button id="turretRight">&#8594;</button>
     </div>
     <select id="ammoSelect">
-      <option value="heat">HEAT 🔥</option>
       <option value="explosive">Explozivní 💥</option>
+      <option value="heat">HEAT 🔥</option>
       <option value="piercing">Průbojná ⚡</option>
       <option value="sabot">Sabot 🎯</option>
     </select>
@@ -94,56 +124,46 @@ button.hold { background-color: #ccc; }
 </div>
 
 <script>
-let sounds = {};
-let soundsReady = false;
+const sounds = {
+  call_explosive: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_explosive.mp3"),
+  call_heat: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_heat.mp3"),
+  call_piercing: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_piercing.mp3"),
+  call_sabot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_sabot.mp3"),
+  engine_idle: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/engine_idle.mp3"),
+  engine_move: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/engine_move.mp3"),
+  ready_explosive: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_explosive.mp3"),
+  ready_heat: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_heat.mp3"),
+  ready_sabot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_sabot.mp3"),
+  reload: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/reload.mp3"),
+  shoot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/shoot.mp3"),
+};
 
-// Inicializace zvuků při prvním tapu (nutné pro iPhone Safari)
-function initSounds() {
-  if (soundsReady) return;
-  sounds = {
-    shoot: new Audio("https://fchuda24-hash.github.io/tank_games/shoot.mp3"),
-    reload: new Audio("https://fchuda24-hash.github.io/tank_games/reload.mp3"),
-    engine_idle: new Audio("https://fchuda24-hash.github.io/tank_games/engine_idle.mp3"),
-    engine_move: new Audio("https://fchuda24-hash.github.io/tank_games/engine_move.mp3"),
-    call_heat: new Audio("https://fchuda24-hash.github.io/tank_games/call_heat.mp3"),
-    call_explosive: new Audio("https://fchuda24-hash.github.io/tank_games/call_explosive.mp3"),
-    call_piercing: new Audio("https://fchuda24-hash.github.io/tank_games/call_piercing.mp3"),
-    call_sabot: new Audio("https://fchuda24-hash.github.io/tank_games/call_sabot.mp3"),
-    ready_heat: new Audio("https://fchuda24-hash.github.io/tank_games/ready_heat.mp3"),
-    ready_explosive: new Audio("https://fchuda24-hash.github.io/tank_games/ready_explosive.mp3"),
-    ready_sabot: new Audio("https://fchuda24-hash.github.io/tank_games/ready_sabot.mp3"),
-  };
-
-  // loop pro určité zvuky
+function initSounds(){
+  Object.values(sounds).forEach(s => {
+    s.preload = "auto";
+  });
   sounds.engine_idle.loop = true;
   sounds.engine_move.loop = true;
   sounds.reload.loop = true;
 
-  soundsReady = true;
-  console.log("Sounds initialized ✅");
+  // motor vrčí hned na začátku
+  sounds.engine_idle.play().catch(e => console.log("Auto-play bloknuto, klikni na stránku"));
 }
-document.body.addEventListener("click", () => {
-  if (!soundsReady) initSounds();
-}, { once:true });
 
-// Ovládání pohybu
 const buttons = ['up','down','left','right'];
 buttons.forEach(id => {
   const btn = document.getElementById(id);
-  btn.addEventListener('click', () => {
-    console.log('Command:', id);
-    if (soundsReady) {
-      if (id === 'up' || id === 'down') {
-        sounds.engine_idle.pause();
-        sounds.engine_move.currentTime = 0;
-        sounds.engine_move.play();
-      }
+  btn.addEventListener('pointerdown', () => {
+    btn.classList.add('hold');
+    if(id === "up" || id === "down"){
+      sounds.engine_idle.pause();
+      sounds.engine_move.currentTime = 0;
+      sounds.engine_move.play();
     }
   });
-  btn.addEventListener('pointerdown', () => btn.classList.add('hold'));
   btn.addEventListener('pointerup', () => {
     btn.classList.remove('hold');
-    if (soundsReady && (id === 'up' || id === 'down')) {
+    if(id === "up" || id === "down"){
       sounds.engine_move.pause();
       sounds.engine_idle.currentTime = 0;
       sounds.engine_idle.play();
@@ -152,35 +172,45 @@ buttons.forEach(id => {
   btn.addEventListener('pointerleave', () => btn.classList.remove('hold'));
 });
 
-// Střelba a přebíjení
 const shoot = document.getElementById('shoot');
 const overlay = document.getElementById('shootOverlay');
 const progressCircle = document.querySelector('#reloadCircle circle.progress');
 let canShoot = true;
 let ammoType = 'explosive';
+
 const ammoSettings = {
-  heat: { emoji:'🔥', cooldown:5000, call:'call_heat', ready:'ready_heat' },
-  explosive: { emoji:'💥', cooldown:7000, call:'call_explosive', ready:'ready_explosive' },
-  piercing: { emoji:'⚡', cooldown:10000, call:'call_piercing', ready:null },
-  sabot: { emoji:'🎯', cooldown:8000, call:'call_sabot', ready:'ready_sabot' }
+  explosive: { emoji:'💥', cooldown:7000, call: "call_explosive", ready: "ready_explosive" },
+  heat: { emoji:'🔥', cooldown:8000, call: "call_heat", ready: "ready_heat" },
+  piercing: { emoji:'⚡', cooldown:10000, call: "call_piercing", ready: null },
+  sabot: { emoji:'🎯', cooldown:6000, call: "call_sabot", ready: "ready_sabot" },
 };
 
-function startCooldown(duration, callSound, readySound){
+const ammoSelect = document.getElementById('ammoSelect');
+ammoSelect.addEventListener('change', e => {
+  ammoType = e.target.value;
+  shoot.textContent = ammoSettings[ammoType].emoji;
+
+  // voice call
+  let call = sounds[ammoSettings[ammoType].call];
+  if(call){ call.currentTime = 0; call.play(); }
+
+  startCooldown(ammoSettings[ammoType].cooldown);
+});
+
+function startCooldown(duration){
   canShoot = false;
   overlay.style.display = "flex";
   const totalDash = 157;
   const startTime = performance.now();
 
-  if (soundsReady) {
-    if (callSound && sounds[callSound]) sounds[callSound].play();
-    sounds.reload.currentTime = 0;
-    sounds.reload.play();
-  }
+  sounds.reload.currentTime = 0;
+  sounds.reload.play();
 
   function update(time) {
     let elapsed = time - startTime;
     let progress = Math.min(elapsed / duration, 1);
     progressCircle.style.strokeDashoffset = totalDash * (1 - progress);
+
     if(progress < 1){
       requestAnimationFrame(update);
     }
@@ -191,30 +221,24 @@ function startCooldown(duration, callSound, readySound){
     overlay.style.display = "none";
     progressCircle.style.strokeDashoffset = totalDash;
     canShoot = true;
-    if (soundsReady) {
-      sounds.reload.pause();
-      if (readySound && sounds[readySound]) sounds[readySound].play();
+    sounds.reload.pause();
+
+    let ready = ammoSettings[ammoType].ready;
+    if(ready && sounds[ready]){
+      sounds[ready].currentTime = 0;
+      sounds[ready].play();
     }
   }, duration);
 }
 
 shoot.addEventListener('click', () => {
-  if(!canShoot || !soundsReady) return;
+  if(!canShoot) return;
   console.log('Command: shoot', ammoType);
   sounds.shoot.currentTime = 0;
   sounds.shoot.play();
-  startCooldown(ammoSettings[ammoType].cooldown, ammoSettings[ammoType].call, ammoSettings[ammoType].ready);
+  startCooldown(ammoSettings[ammoType].cooldown);
 });
 
-// Ammo výběr
-const ammoSelect = document.getElementById('ammoSelect');
-ammoSelect.addEventListener('change', e => {
-  ammoType = e.target.value;
-  shoot.textContent = ammoSettings[ammoType].emoji;
-  startCooldown(ammoSettings[ammoType].cooldown, ammoSettings[ammoType].call, ammoSettings[ammoType].ready);
-});
-
-// Ovládání věže
 const turretButtons = ['turretLeft','turretRight'];
 turretButtons.forEach(id => {
   const btn = document.getElementById(id);
@@ -223,6 +247,9 @@ turretButtons.forEach(id => {
   btn.addEventListener('pointerup', () => btn.classList.remove('hold'));
   btn.addEventListener('pointerleave', () => btn.classList.remove('hold'));
 });
+
+initSounds();
 </script>
 </body>
 </html>
+
