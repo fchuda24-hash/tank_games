@@ -1,220 +1,224 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Tank Controls Demo — sounds fixed</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tank Controls Demo</title>
 <style>
-*{user-select:none;-webkit-user-select:none}
-body{display:flex;justify-content:space-around;align-items:center;height:100vh;margin:0;font-family:Arial;background:#111;color:#fff}
-.controls{display:flex;flex-direction:column;align-items:center}
-.row{display:flex;justify-content:center;margin:5px}
-button{width:80px;height:80px;font-size:24px;margin:5px;border-radius:12px;transition:transform .08s,background-color .12s}
-button:active{transform:scale(.88)}button.hold{background:#555}
-#shoot{background:#d33;color:#fff;width:70px;height:70px;border-radius:50%;position:relative;margin-bottom:6px}
-#shootOverlay{position:absolute;top:0;left:0;width:70px;height:70px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:12px;display:none}
-#reloadCircle{width:50px;height:50px;transform:rotate(-90deg)}
-#reloadCircle svg{width:100%;height:100%}
-#reloadCircle circle{fill:none;stroke:rgba(255,255,255,.25);stroke-width:5}
-#reloadCircle circle.progress{stroke:#fff;stroke-dasharray:157;stroke-dashoffset:157;transition:none}
-#turretControls{display:flex;flex-direction:column;align-items:center;margin-top:6px}
-#ammoSelect{margin-top:10px;font-size:16px;padding:4px}
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-touch-callout: none;
+}
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  display:flex; justify-content:space-around; align-items:center;
+  height:100vh; margin:0; font-family:Arial;
+}
+.controls { display:flex; flex-direction:column; align-items:center; }
+.row { display:flex; justify-content:center; margin:5px; }
+button {
+  width:80px; height:80px; font-size:24px; margin:5px; border-radius:12px;
+  transition: transform 0.1s, background-color 0.2s;
+}
+button:active { transform: scale(0.85); }
+button.hold { background-color: #ccc; }
+
+#shoot { background:red; color:white; width:70px; height:70px;
+  font-size:24px; border-radius:50%; margin-bottom:5px; position:relative; }
+#shootOverlay {
+  position:absolute; top:0; left:0; width:70px; height:70px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.5); color:white; font-size:12px; display:none;
+}
+#reloadCircle { width:50px; height:50px; transform: rotate(-90deg); }
+#reloadCircle svg { width:100%; height:100%; }
+#reloadCircle circle {
+  fill:none; stroke:rgba(255,255,255,0.3); stroke-width:5;
+}
+#reloadCircle circle.progress {
+  stroke:white; stroke-dasharray: 157; stroke-dashoffset: 157; transition:none;
+}
+#turretControls { display:flex; flex-direction:column; align-items:center; margin-top:5px; }
+#turretLabel { font-size:14px; margin-top:2px; }
+#ammoSelect { margin-top:10px; font-size:16px; padding:4px; }
 </style>
 </head>
 <body>
-  <div class="controls">
-    <button id="up">⬆️</button>
-    <button id="down">⬇️</button>
-  </div>
+<div class="controls">
+  <button id="up">&#8593;</button>
+  <button id="down">&#8595;</button>
+</div>
 
-  <div class="controls" style="position:relative">
-    <div style="position:relative">
-      <button id="shoot">💥</button>
-      <div id="shootOverlay"><div>Přebíjení</div><div id="reloadCircle"><svg><circle cx="25" cy="25" r="25"></circle><circle class="progress" cx="25" cy="25" r="25"></circle></svg></div></div>
-    </div>
-
-    <div class="row">
-      <button id="left">⬅️</button>
-      <button id="right">➡️</button>
-    </div>
-
-    <div id="turretControls">
-      <div id="turretLabel">Pohyb věže</div>
-      <div id="turretButtons" class="row">
-        <button id="turretLeft">↶⬅️</button>
-        <button id="turretRight">➡️</button>
+<div class="controls" style="position:relative;">
+  <div style="position:relative;">
+    <button id="shoot">💥</button>
+    <div id="shootOverlay">
+      <div>Přebíjení</div>
+      <div id="reloadCircle">
+        <svg>
+          <circle cx="25" cy="25" r="25"></circle>
+          <circle class="progress" cx="25" cy="25" r="25"></circle>
+        </svg>
       </div>
-      <select id="ammoSelect">
-        <option value="heat">HEAT 🔥</option>
-        <option value="sabot">Sabot 🚀</option>
-        <option value="explosive">Výbušnina 💥</option>
-        <option value="piercing">Průbojná ⚡</option>
-      </select>
     </div>
   </div>
+  <div class="row">
+    <button id="left">&#8592;</button>
+    <button id="right">&#8594;</button>
+  </div>
+
+  <div id="turretControls">
+    <div id="turretLabel">Pohyb věže</div>
+    <div id="turretButtons" class="row">
+      <button id="turretLeft">&#8634;&#8592;</button>
+      <button id="turretRight">&#8594;</button>
+    </div>
+    <select id="ammoSelect">
+      <option value="heat">HEAT 🔥</option>
+      <option value="explosive">Explozivní 💥</option>
+      <option value="piercing">Průbojná ⚡</option>
+      <option value="sabot">Sabot 🚀</option>
+    </select>
+  </div>
+</div>
 
 <script>
-// ---------- SOUNDS (použij přesně tyhle soubory ve složce sounds/) ----------
-const S = {
-  engineIdle: new Audio("sounds/engine_idle.mp3"),   // loop while idle
-  engineMove: new Audio("sounds/engine_move.mp3"),   // loop while moving
-  shoot:      new Audio("sounds/shoot.mp3"),
-  reload:     new Audio("sounds/reload.mp3"),        // loop during reload
-  // callouts when starting reload (announce)
-  call_heat:      new Audio("sounds/call_heat.mp3"),
-  call_sabot:     new Audio("sounds/call_sabot.mp3"),
-  call_explosive: new Audio("sounds/call_explosive.mp3"),
-  call_piercing:  new Audio("sounds/call_piercing.mp3"),
-  // ready sounds when reload finished (no piercing ready)
-  ready_heat:      new Audio("sounds/ready_heat.mp3"),
-  ready_sabot:     new Audio("sounds/ready_sabot.mp3"),
-  ready_explosive: new Audio("sounds/ready_explosive.mp3")
+// ================== SOUNDS ==================
+const sounds = {
+  shoot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/shoot.mp3"),
+  reload: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/reload.mp3"),
+  engine_idle: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/engine_idle.mp3"),
+  engine_move: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/engine_move.mp3"),
+  call_explosive: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_explosive.mp3"),
+  call_heat: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_heat.mp3"),
+  call_piercing: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_piercing.mp3"),
+  call_sabot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/call_sabot.mp3"),
+  ready_explosive: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_explosive.mp3"),
+  ready_heat: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_heat.mp3"),
+  ready_sabot: new Audio("https://github.com/fchuda24-hash/tank_games/raw/main/ready_sabot.mp3"),
 };
+sounds.engine_idle.loop = true;
+sounds.engine_move.loop = true;
+sounds.reload.loop = true;
 
-// loops
-S.engineIdle.loop = true;
-S.engineMove.loop = true;
-S.reload.loop = true;
-
-// safe play helper (avoid UnhandledPromise)
-function safePlay(aud){
-  if(!aud) return;
-  try{ aud.currentTime = 0; aud.play().catch(()=>{}); }catch(e){}
-}
-function safePause(aud){
-  if(!aud) return;
-  try{ aud.pause(); aud.currentTime = 0; }catch(e){}
-}
-
-// start idle on first user interaction if autoplay blocked
-let userInteracted = false;
-function ensureAudioAfterUser(){
-  if(userInteracted) return;
-  userInteracted = true;
-  safePlay(S.engineIdle);
-}
-window.addEventListener('pointerdown', ensureAudioAfterUser, {once:true});
-window.addEventListener('touchstart', ensureAudioAfterUser, {once:true});
-
-// ---------- CONTROLS ----------
-const btnIds = ['up','down','left','right'];
-btnIds.forEach(id=>{
-  const b = document.getElementById(id);
-  b.addEventListener('pointerdown', e => { b.classList.add('hold'); if(id==='up' || id==='down') startMoveSound(id); });
-  b.addEventListener('pointerup',   e => { b.classList.remove('hold'); if(id==='up' || id==='down') stopMoveSound(); });
-  b.addEventListener('pointerleave',e => { b.classList.remove('hold'); if(id==='up' || id==='down') stopMoveSound(); });
+// ================== BUTTONS ==================
+const buttons = ['up','down','left','right'];
+buttons.forEach(id => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('pointerdown', () => {
+    btn.classList.add('hold');
+    console.log('Command:', id);
+    if(id==="up"||id==="down"){
+      stopSound(sounds.engine_idle);
+      playSound(sounds.engine_move,true);
+    }
+  });
+  btn.addEventListener('pointerup', () => {
+    btn.classList.remove('hold');
+    if(id==="up"||id==="down"){
+      stopSound(sounds.engine_move);
+      playSound(sounds.engine_idle,true);
+    }
+  });
+  btn.addEventListener('pointerleave', () => btn.classList.remove('hold'));
 });
 
-// turret buttons (simple hold effect)
-['turretLeft','turretRight'].forEach(id=>{
-  const b = document.getElementById(id);
-  b.addEventListener('pointerdown', ()=> b.classList.add('hold'));
-  b.addEventListener('pointerup', ()=> b.classList.remove('hold'));
-  b.addEventListener('pointerleave', ()=> b.classList.remove('hold'));
-});
-
-// ---------- MOVE SOUND logic ----------
-let moving = false;
-function startMoveSound(direction){
-  // stop idle, start move
-  if(moving) return;
-  moving = true;
-  safePause(S.engineIdle);
-  safePlay(S.engineMove);
-}
-function stopMoveSound(){
-  if(!moving) return;
-  moving = false;
-  safePause(S.engineMove);
-  safePlay(S.engineIdle);
-}
-
-// ---------- SHOOT / AMMO / RELOAD ----------
-const shootBtn = document.getElementById('shoot');
+// ================== SHOOTING ==================
+const shoot = document.getElementById('shoot');
 const overlay = document.getElementById('shootOverlay');
 const progressCircle = document.querySelector('#reloadCircle circle.progress');
-
 let canShoot = true;
-let ammoType = 'heat';
-
+let ammoType = 'explosive';
 const ammoSettings = {
-  heat: { emoji:'🔥', cooldown:6000 },
-  explosive: { emoji:'💥', cooldown:7000 },
-  sabot: { emoji:'🚀', cooldown:8000 },
-  piercing: { emoji:'⚡', cooldown:5000 }
+  heat: { emoji:'🔥', cooldown:8000, call:"call_heat", ready:"ready_heat" },
+  explosive: { emoji:'💥', cooldown:7000, call:"call_explosive", ready:"ready_explosive" },
+  piercing: { emoji:'⚡', cooldown:10000, call:"call_piercing", ready:null },
+  sabot: { emoji:'🚀', cooldown:9000, call:"call_sabot", ready:"ready_sabot" }
 };
-const ammoDamage = { heat:1, explosive:1, sabot:1.5, piercing:0.5 };
+const ammoDamage = { heat:1, explosive:1, piercing:1.5, sabot:2 };
 
 const ammoSelect = document.getElementById('ammoSelect');
-ammoSelect.addEventListener('change', e=>{
+ammoSelect.addEventListener('change', e => {
   ammoType = e.target.value;
-  shootBtn.textContent = ammoSettings[ammoType].emoji;
-  // play callout if exists
-  const callName = "call_" + ammoType;
-  if(S[callName]) safePlay(S[callName]);
-  // start cooldown as if reloading after changing ammo
-  startCooldown(ammoSettings[ammoType].cooldown);
+  shoot.textContent = ammoSettings[ammoType].emoji;
+  playSound(sounds[ammoSettings[ammoType].call]);
+  startCooldown(ammoSettings[ammoType].cooldown,true);
 });
 
 let tankHealth = 5;
 
-// animation + timers refs
-let rafId = null;
-let timeoutId = null;
-
-function startCooldown(duration){
-  // cancel existing
-  if(rafId) cancelAnimationFrame(rafId);
-  if(timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+function startCooldown(duration,change=false){
   canShoot = false;
   overlay.style.display = "flex";
-
-  // start reload sound (looping)
-  safePlay(S.reload);
-
+  playSound(sounds.reload,true);
   const totalDash = 157;
-  const started = performance.now();
-
-  function frame(t){
-    const elapsed = t - started;
-    const progress = Math.min(elapsed / duration, 1);
+  const startTime = performance.now();
+  function update(time) {
+    let elapsed = time - startTime;
+    let progress = Math.min(elapsed / duration, 1);
     progressCircle.style.strokeDashoffset = totalDash * (1 - progress);
-    if(progress < 1) rafId = requestAnimationFrame(frame);
-    else rafId = null;
+    if(progress < 1){ requestAnimationFrame(update); }
   }
-  rafId = requestAnimationFrame(frame);
-
-  timeoutId = setTimeout(()=> {
-    // finish
-    canShoot = true;
+  requestAnimationFrame(update);
+  setTimeout(() => {
     overlay.style.display = "none";
     progressCircle.style.strokeDashoffset = totalDash;
-    // stop reload sound
-    safePause(S.reload);
-    // play ready if exists
-    const readyName = "ready_" + ammoType;
-    if(S[readyName]) safePlay(S[readyName]);
-    // clear refs
-    if(rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    timeoutId = null;
+    canShoot = true;
+    stopSound(sounds.reload);
+    if(change && ammoSettings[ammoType].ready){
+      playSound(sounds[ammoSettings[ammoType].ready]);
+    }
   }, duration);
 }
 
-shootBtn.addEventListener('click', ()=>{
+shoot.addEventListener('click', () => {
   if(!canShoot) return;
-  safePlay(S.shoot);
-
+  console.log('Command: shoot', ammoType);
+  playSound(sounds.shoot);
   tankHealth -= ammoDamage[ammoType];
   if(tankHealth < 0) tankHealth = 0;
-  console.log("Shot:", ammoType, "health left:", tankHealth);
-
+  console.log('Tank health:', tankHealth, '/ 5');
   startCooldown(ammoSettings[ammoType].cooldown);
 });
 
-// ensure progress circle reset on load
-progressCircle.style.strokeDashoffset = 157;
+// ================== TURRET ==================
+['turretLeft','turretRight'].forEach(id => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('pointerdown', () => btn.classList.add('hold'));
+  btn.addEventListener('pointerup', () => btn.classList.remove('hold'));
+  btn.addEventListener('pointerleave', () => btn.classList.remove('hold'));
+});
+
+// ================== SOUND HELPERS ==================
+function playSound(audio,loop=false){
+  if(!audio) return;
+  audio.loop = loop;
+  audio.currentTime = 0;
+  audio.play().catch(e=>console.log("Audio play blocked",e));
+}
+function stopSound(audio){
+  if(!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
+}
+
+// ================== AUDIO UNLOCK FIX ==================
+function unlockAudio(){
+  Object.values(sounds).forEach(s => {
+    s.play().then(()=>{ 
+      s.pause(); 
+      s.currentTime=0; 
+    }).catch(()=>{});
+  });
+  document.removeEventListener("click", unlockAudio);
+}
+document.addEventListener("click", unlockAudio);
+
 </script>
 </body>
 </html>
-
 
